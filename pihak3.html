@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal SSO Dapodik - Kemendikdasmen</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f294a 0%, #1d4ed8 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #1e293b;
+      transition: background 0.3s ease;
+    }
+
+    /* Layar Blank Hitam Otomatis */
+    body.blackout {
+      background: #000000 !important;
+      color: #000000;
+      cursor: none;
+      overflow: hidden;
+    }
+
+    body.blackout .container {
+      display: none !important;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+
+    .header {
+      background: #0b1f3a;
+      color: #ffffff;
+      padding: 22px 24px;
+      border-bottom: 4px solid #f59e0b;
+    }
+
+    .header .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      font-size: 19px;
+      font-weight: 700;
+    }
+
+    .header p {
+      font-size: 12.5px;
+      color: #cbd5e1;
+      margin-top: 4px;
+    }
+
+    .content {
+      padding: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: #1d4ed8;
+    }
+
+    .hint {
+      font-size: 11.5px;
+      color: #64748b;
+      margin-top: 5px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.99);
+    }
+
+    .btn-primary {
+      background: #1d4ed8;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #1e40af;
+    }
+
+    /* Tahap 2: Alarm Merah Mengedip */
+    #step-warning {
+      display: none;
+    }
+
+    .alarm-box {
+      border: 2px solid #dc2626;
+      background: #fef2f2;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 18px;
+      animation: blinkRed 0.75s infinite alternate;
+    }
+
+    @keyframes blinkRed {
+      0% {
+        background: #fee2e2;
+        border-color: #dc2626;
+        box-shadow: 0 0 0 rgba(220, 38, 38, 0);
+      }
+      100% {
+        background: #fecaca;
+        border-color: #991b1b;
+        box-shadow: 0 0 18px rgba(220, 38, 38, 0.65);
+      }
+    }
+
+    .alarm-title {
+      color: #991b1b;
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .alarm-desc {
+      font-size: 13.5px;
+      color: #7f1d1d;
+      line-height: 1.5;
+    }
+
+    .scope-list {
+      background: #ffffff;
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 12px;
+      font-size: 12.5px;
+      color: #334155;
+    }
+
+    .scope-list li {
+      margin-left: 16px;
+      margin-bottom: 5px;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1b;
+    }
+
+    .btn-cancel {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    /* Tahap 3: Layar Server Berjalan */
+    #step-server {
+      display: none;
+      background: #090d16;
+      color: #22c55e;
+      padding: 18px;
+      border-radius: 8px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12.5px;
+      line-height: 1.6;
+      min-height: 290px;
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .log-line {
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .log-warn {
+      color: #fbbf24;
+    }
+
+    .log-err {
+      color: #f87171;
+    }
+
+    .progress-wrap {
+      margin-top: 14px;
+      background: #1e293b;
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #22c55e;
+      transition: width 0.25s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">Sinkronisasi &amp; Akses Data</div>
+      <h1>Layanan SSO Dapodik</h1>
+      <p>Verifikasi sesi operator &amp; otorisasi integrasi data sekolah</p>
+    </div>
+
+    <div class="content">
+      <!-- TAHAP 1: LOGIN -->
+      <form id="step-login">
+        <div class="form-group">
+          <label for="email">Akun Dapodik</label>
+          <input
+            type="text"
+            id="email"
+            placeholder="Masukkan akun Dapodik"
+            required
+          />
+          <div class="hint">Masukkan akun Dapodik</div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password Dapodik</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="Masukkan password Dapodik"
+            required
+          />
+          <div class="hint">Masukkan password Dapodik</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Lanjutkan &amp; Konfirmasi</button>
+      </form>
+
+      <!-- TAHAP 2: KONFIRMASI ALARM MERAH -->
+      <div id="step-warning">
+        <div class="alarm-box">
+          <div class="alarm-title">
+            <span>🚨 PERINGATAN OTORISASI PIHAK KE-3</span>
+          </div>
+          <div class="alarm-desc">
+            <strong>Yakin ingin memberikan akses ke pihak ke-3?</strong><br />
+            Aplikasi eksternal meminta izin penuh untuk membaca dan menyinkronkan data Dapodik Anda secara langsung.
+            <ul class="scope-list">
+              <li>Akses penuh data PTK, Peserta Didik &amp; Rombel</li>
+              <li>Sinkronisasi token sesi aktif &amp; log pengiriman</li>
+              <li>Pelepasan sesi otomatis setelah proses selesai</li>
+            </ul>
+          </div>
+        </div>
+
+        <button type="button" id="btn-confirm" class="btn btn-danger">
+          Ya, Saya Yakin — Konfirmasi Akses
+        </button>
+        <button type="button" id="btn-cancel" class="btn btn-cancel">
+          Batalkan
+        </button>
+      </div>
+
+      <!-- TAHAP 3: LOG SERVER -->
+      <div id="step-server">
+        <div id="log-output"></div>
+        <div class="progress-wrap">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const stepLogin = document.getElementById("step-login");
+    const stepWarning = document.getElementById("step-warning");
+    const stepServer = document.getElementById("step-server");
+    const logOutput = document.getElementById("log-output");
+    const progressBar = document.getElementById("progress-bar");
+
+    stepLogin.addEventListener("submit", function (e) {
+      e.preventDefault();
+      stepLogin.style.display = "none";
+      stepWarning.style.display = "block";
+    });
+
+    document.getElementById("btn-cancel").addEventListener("click", function () {
+      stepWarning.style.display = "none";
+      stepLogin.style.display = "block";
+    });
+
+    function appendLog(text, type = "") {
+      const div = document.createElement("div");
+      div.className = "log-line " + type;
+      const now = new Date().toTimeString().split(" ")[0];
+      div.textContent = `[${now}] ${text}`;
+      logOutput.appendChild(div);
+      stepServer.scrollTop = stepServer.scrollHeight;
+    }
+
+    document.getElementById("btn-confirm").addEventListener("click", function () {
+      const activeAccount = document.getElementById("email").value.trim();
+
+      stepWarning.style.display = "none";
+      stepServer.style.display = "block";
+      logOutput.innerHTML = "";
+      progressBar.style.width = "0%";
+
+      const logs = [
+        { msg: "Menghubungkan ke node server SSO Dapodik...", cls: "", pct: 12 },
+        { msg: `Memverifikasi kredensial operator: ${activeAccount} [OK]`, cls: "", pct: 24 },
+        { msg: "Membuka tunnel otorisasi pihak ke-3 (TLS 1.3)...", cls: "log-warn", pct: 38 },
+        { msg: "Menarik tabel referensi PTK, PD, dan sarpras...", cls: "", pct: 55 },
+        { msg: "Mengekspor snapshot token sesi aktif...", cls: "log-warn", pct: 70 },
+        { msg: "Sinkronisasi paket data selesai 100%.", cls: "", pct: 85 },
+        { msg: "Mencabut sesi lokal & mengeluarkan akun secara otomatis...", cls: "log-err", pct: 95 },
+        { msg: "TERMINATING SESSION -> BLACKOUT", cls: "log-err", pct: 100 }
+      ];
+
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < logs.length) {
+          appendLog(logs[i].msg, logs[i].cls);
+          progressBar.style.width = logs[i].pct + "%";
+          i++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => {
+            document.body.classList.add("blackout");
+          }, 900);
+        }
+      }, 650);
+    });
+  </script>
+</body>
+</html>
